@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Panel de Control</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Panel de Control</h1>
+    <table>
+        <tr>
+            <th>Métrica</th>
+            <th>Valor</th>
+        </tr>
+        <tr>
+            <td>Número total de productos en la tienda</td>
+            <td id="total-products"></td>
+        </tr>
+        <tr>
+            <td>Número total de pedidos realizados</td>
+            <td id="total-orders"></td>
+        </tr>
+        <tr>
+            <td>Ingresos totales generados</td>
+            <td id="total-revenue"></td>
+        </tr>
+        <tr>
+            <td>Precio promedio de los productos</td>
+            <td id="average-price"></td>
+        </tr>
+        <tr>
+            <td>Productos más vendidos</td>
+            <td id="top-products"></td>
+        </tr>
+    </table>
+
+    <script>
+        // Obtener datos de la API Fake Store
+        fetch('https://fakestoreapi.com/products')
+            .then(response => response.json())
+            .then(data => {
+                // Número total de productos
+                document.getElementById('total-products').textContent = data.length;
+
+                // Precio promedio de los productos
+                const totalProducts = data.length;
+                const totalPrices = data.reduce((sum, product) => sum + product.price, 0);
+                const averagePrice = totalPrices / totalProducts;
+                document.getElementById('average-price').textContent = `$${averagePrice.toFixed(2)}`;
+            });
+
+        fetch('https://fakestoreapi.com/orders')
+            .then(response => response.json())
+            .then(data => {
+                // Número total de pedidos realizados
+                document.getElementById('total-orders').textContent = data.length;
+
+                // Ingresos totales generados
+                const totalRevenue = data.reduce((sum, order) => sum + order.total, 0);
+                document.getElementById('total-revenue').textContent = `$${totalRevenue.toFixed(2)}`;
+
+                // Productos más vendidos (según el número de pedidos)
+                const productsCountMap = {};
+                data.forEach(order => {
+                    order.products.forEach(product => {
+                        if (productsCountMap[product.id]) {
+                            productsCountMap[product.id]++;
+                        } else {
+                            productsCountMap[product.id] = 1;
+                        }
+                    });
+                });
+
+                const sortedProducts = Object.entries(productsCountMap)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(entry => entry[0]);
+                const topProducts = sortedProducts.slice(0, 3).join(', ');
+                document.getElementById('top-products').textContent = topProducts;
+            });
+    </script>
+</body>
+</html>
